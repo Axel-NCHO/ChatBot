@@ -11,7 +11,6 @@ class BotService {
     constructor() {
         this.fake_db_address = "./models/db.json"    // not a real db. it's just the json file where i save the bots
         this.bots = {};
-        this.botFactory =new Bot();
     }
 
     static async create(){ //since I cannot return a promise in a constructor
@@ -192,16 +191,28 @@ class BotService {
         console.log("userid: ", userid);
         console.log("bots: ", this.bots[userid]);
         if (this.bots[userid]["inUse"] != null) {
-            let index = this.bots[userid]["bots"].findIndex(e => e.name = this.bots[userid]["inUse"]);
-            let data = {
-                name: this.bots[userid]["inUse"],
-                personality: this.bots[userid]["bots"][index].personality,
-                user: userid,
-                userVars: await this.bots[userid]["bots"][index].getUservars(userid)
-            };
-            this.modifyInFakeDB(data);
-            console.log(`Saved context for bot ${data.name} of user ${data.user}`);
+            let index = this.bots[userid]["bots"].findIndex(e => e.name === this.bots[userid]["inUse"]);
+            if (index > -1) {
+                let data = {
+                    name: this.bots[userid]["inUse"],
+                    personality: this.bots[userid]["bots"][index].personality,
+                    user: userid,
+                    userVars: await this.bots[userid]["bots"][index].getUservars(userid)
+                };
+                this.modifyInFakeDB(data);
+                console.log(`Saved context for bot ${data.name} of user ${data.user}`);
+            } else
+                console.log("Error on index", index);
+
         }
+    }
+
+    async logOut(userid) {
+        this.saveContext(userid)
+            .then(() => {
+                delete this.bots[userid];
+            })
+            .catch((err) => {console.log(err)});
     }
 
     async useBot(data) {
@@ -209,6 +220,12 @@ class BotService {
             .then(() => {
                 this.bots[data.user]["inUse"] = data.name;
             });
+    }
+
+    async getResponse(data) {
+        let index = this.bots[data.user]["bots"].findIndex(e => e.name === this.bots[data.user]["inUse"]);
+        let bot = this.bots[data.user]["bots"][index];
+        return await bot.reply(data.user, data.input);
     }
 
     /**

@@ -67,7 +67,7 @@ router.post('/logout', (req, res) => {
     let UserService = req.app.get('UserService');
     let BotService = req.app.get('BotService');
     UserService.logOut(req.session.userid);
-    BotService.saveContext(req.session.userid)
+    BotService.logOut(req.session.userid)
         .then(() => {
             req.session.destroy();
             res.status(200).redirect('/');

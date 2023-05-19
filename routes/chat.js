@@ -24,4 +24,20 @@ router.get('/:botname', (req,res) => {
         res.status(400).redirect('/');
 });
 
+router.post('/response', (req,res) => {
+    if (req.session.userid) {
+        let BotService = req.app.get('BotService');
+        BotService.getResponse({
+            botname: req.body.botname,
+            user: req.body.user,
+            input: req.body.input
+        }).then((response) => {
+            res.status(200).send(JSON.stringify({text: response}));
+        }).catch((err) => {
+            res.status(500).send(JSON.stringify({text: err.stack}));
+        });
+    } else
+        res.status(400).redirect('/');
+});
+
 module.exports = router;

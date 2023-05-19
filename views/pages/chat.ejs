@@ -3,10 +3,12 @@
 <head>
     <title>ChatBot</title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
+    <script src="/javascripts/chat-script.js"></script>
 </head>
 <body>
 <h2>Welcome <%= userid %> You are chatting with <%= botname %></h2>
 <p id="userid" style="display: none"><%=userid%></p>
+<p id="botname" style="display: none"><%=botname%></p>
 <br>
 <br>
 <div id="chat-history">
@@ -15,5 +17,5 @@
 <div>
     <input type="text" id="chat-user-input">
 </div>
-<%- include('../partials/footer-logout') %>
+<%- include('../partials/logout') %>
 <%- include('../partials/footer') %>
