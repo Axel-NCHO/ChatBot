@@ -10,7 +10,7 @@ router.get('/', function(req, res, next) {
 });
 
 /* Create a new bot */
-router.post('/add', (req, res) => {
+router.post('/newbot', (req, res) => {
   let botService = req.app.get('BotService');
   let capitalize = req.app.get('capitalize');
   let botName = req.body.name;
