@@ -28,24 +28,28 @@ class BotService {
         if (this.exists({user: data.user, name: data.name})) {
             throw new Error("You already created a bot with this name");
         }
-        try {
-            this.botFactory.create(data);
-        } catch (err) {
-            throw err;
-        }
-        let new_bot = this.botFactory.bot;
-        if(data.user in this.bots)
-            this.bots[data.user].push(new_bot);
-        else
-            this.bots[data.user] = [new_bot];
-        console.log("Current bots: ", this.bots);
-        this.addToFakeDB(new_bot);
-        return `created bot named ${data.name} with personality ${data.personality}`;
+        let new_bot = new RiveScript({utf8: true});
+        new_bot.name = data.name;
+        new_bot.personality = data.personality;
+        new_bot.user = data.user;
+        new_bot.loadFile(`./rivescripts/${data.personality}.rive`)
+            .then(() => {
+                new_bot.sortReplies();
+                if(data.user in this.bots)
+                    this.bots[data.user]["bots"].push(new_bot);
+                else
+                    this.bots[data.user] = {bots: [new_bot], inUse: null}  ;
+            })
+            .then(() => {
+                console.log("Current bots: ", this.bots);
+                this.addToFakeDB(data);
+                return `created bot named ${data.name} with personality ${data.personality}`;
+        });
     }
 
     /**
      * Insert data into the data base
-     * @param {*} datag
+     * @param {*} data
      * @returns
      */
     async addToFakeDB(data) {
@@ -120,14 +124,11 @@ class BotService {
      * @param {*} index
      * @param {*} new_data
      */
-    async modifyInFakeDB(index, new_data) {
+    async modifyInFakeDB(data) {
         let dbString = fs.readFileSync(this.fake_db_address, {encoding: "utf-8", flag: 'r'});
         let db_content = JSONC.parse(dbString);
-        db_content["bots"][index] = new_data;
-        /*
-        db_content[index].data.name = new_data.name;
-        db_content[index].data.type = new_data.type;
-        db_content[index].data.ability = new_data.ability;*/
+        let index = db_content["bots"].findIndex(e => e.name == data.name && e.user == data.user);
+        db_content["bots"][index] = data;
         fs.writeFileSync(this.fake_db_address, JSONC.stringify(db_content), {encoding: "utf-8", flag: 'w'});
     }
 
@@ -150,35 +151,64 @@ class BotService {
      * Get all the bots
      * @returns
      */
-    getBots(userId) {
-        let bots = this.getFromFakeDB({user: userId});
-        if (!(userId in this.bots))
-            this.bots[userId] = bots;
-        return bots;
+    async getBots(userId) {
+        this.bots[userId] = {bots: [], inUse: null};
+        await this.getFromFakeDB({user: userId});
+        return this.bots[userId]["bots"].map(e => {
+            return {name: e.name, personality: e.personality, user: e.user}
+        });
     }
 
-    getFromFakeDB(data) {
+    async getFromFakeDB(data) {
         let dbString = fs.readFileSync(this.fake_db_address, {encoding: "utf-8", flag: 'r'});
         let db_content = JSONC.parse(dbString);
-        let usersbots = []
         console.log("Got from db: ", db_content["bots"]);
         if (db_content["bots"].length !== 0) {
-            db_content["bots"].foreach((bot) => {
-                if (bot.user == data.user) {
-                    let botObject = new RiveScript(bot);
+            for (const bot of db_content["bots"]) {
+                if (bot.user === data.user) {
+                    let botObject = new RiveScript({utf8: true});
                     botObject.name = bot.name;
+                    botObject.personality = bot.personality;
                     botObject.user = bot.user;
-                    usersbots.push(botObject);
+                    await botObject.loadFile(`./rivescripts/${bot.personality}.rive`).catch(err => console.log(err));
+                    botObject.sortReplies();
+                    if (bot.userVars)
+                        await botObject.setUservars(data.user, bot.userVars).catch(err => console.log(err));
+                    this.bots[data.user]["bots"].push(botObject);
+                    console.log("pushed");
+
                 }
-            });
+            }
         }
-        return usersbots;
     }
 
     exists(data) {
         console.log("Current bots: ", this.bots);
-        let index = this.bots[data.user].findIndex(e=> e.name == data.name);
+        let index = this.bots[data.user]["bots"].findIndex(e=> e.name == data.name);
         return index > -1;
+    }
+
+    async saveContext(userid){
+        console.log("userid: ", userid);
+        console.log("bots: ", this.bots[userid]);
+        if (this.bots[userid]["inUse"] != null) {
+            let index = this.bots[userid]["bots"].findIndex(e => e.name = this.bots[userid]["inUse"]);
+            let data = {
+                name: this.bots[userid]["inUse"],
+                personality: this.bots[userid]["bots"][index].personality,
+                user: userid,
+                userVars: await this.bots[userid]["bots"][index].getUservars(userid)
+            };
+            this.modifyInFakeDB(data);
+            console.log(`Saved context for bot ${data.name} of user ${data.user}`);
+        }
+    }
+
+    async useBot(data) {
+        this.saveContext(data.user)
+            .then(() => {
+                this.bots[data.user]["inUse"] = data.name;
+            });
     }
 
     /**
@@ -284,4 +314,4 @@ function capitalize(string) {
 
 }
 
-module.exports = BotService;
+module.exports = {BotService, capitalize};

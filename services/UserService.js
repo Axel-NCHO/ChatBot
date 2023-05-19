@@ -134,7 +134,7 @@ class UserService {
         let user = this.getFromFakeDB(data, true);
         if (user != null) {
             this.users.push(user);
-            return user;
+            return user.id;
         }
         throw new Error("cannot find this user");
     }
@@ -163,6 +163,12 @@ class UserService {
      */
     getConnectedUsers(){
         return this.users;
+    }
+
+    logOut(userid) {
+        let index = this.users.findIndex(e => e.id == userid);
+        if (index > -1)
+            this.users.splice(index, 1);
     }
 
     /**

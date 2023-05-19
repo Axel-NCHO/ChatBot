@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ChatBot</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+</head>
+<body>
+<h2>Welcome <%= userid %> You are chatting with <%= botname %></h2>
+<p id="userid" style="display: none"><%=userid%></p>
+<br>
+<br>
+<div id="chat-history">
+
+</div>
+<div>
+    <input type="text" id="chat-user-input">
+</div>
+<%- include('../partials/footer-logout') %>
+<%- include('../partials/footer') %>
