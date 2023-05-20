@@ -8,7 +8,6 @@ class UserService {
 
     constructor() {
         this.fake_db_address = "./models/db.json"    // not a real db. it's just the json file where i save the bots
-        this.users = [];
     }
 
     static async create(){ //since I cannot return a promise in a constructor
@@ -20,6 +19,7 @@ class UserService {
      * @param {*} data
      * @returns
      */
+    /*
     async addUser(data) {
         let new_user;
         if (this.getFromFakeDB(data) != null) {
@@ -30,20 +30,21 @@ class UserService {
         console.log("Current users: ", this.users);
         this.addToFakeDB(new_user);
         return `created user named ${data.id}`;
-    }
+    }*/
 
     /**
      * Insert data into the data base
      * @param {*} data
      * @returns
      */
+    /*
     async addToFakeDB(data) {
         let dbString = fs.readFileSync(this.fake_db_address, {encoding: "utf-8", flag: 'r'});
         let db_content = JSON.parse(dbString);
         db_content["users"].push(data);
         fs.writeFileSync(this.fake_db_address, JSON.stringify(db_content), {encoding: "utf-8", flag: 'w'});
         return true;
-    }
+    }*/
 
     addExistingUser(data) {
         this.users.push(data);
@@ -53,7 +54,7 @@ class UserService {
      * Deletes a pokemon
      * @param {*} name
      * @returns
-     */
+     *//*
     async removeUser(id){
         let index = this.users.findIndex(e => e.id == id);
         if(index >-1){
@@ -63,12 +64,12 @@ class UserService {
         }
         throw new Error(`cannot find user ${id}`);
 
-    }
+    }*/
 
     /**
      * Delete data from the data base
      * @param {*} index
-     */
+     *//*
     async removeFromFakeDB(id) {
         let dbString = fs.readFileSync(this.fake_db_address, {encoding: "utf-8", flag: 'r'});
         let db_content = JSON.parse(dbString);
@@ -77,14 +78,14 @@ class UserService {
             db_content["users"].splice(index,1);
         }
         fs.writeFileSync(this.fake_db_address, JSON.stringify(db_content), {encoding: "utf-8", flag: 'w'});
-    }
+    }*/
 
     /**
      * Modify the informations of a pokemon
      * @param {*} key
      * @param {*} new_data must be like {name: str type: str, ability: str}
      * @returns
-     */
+     *//*
     async patchUser(id, new_data) {
         if (undefined == new_data.id) {
             throw new Error("Missing new data");
@@ -96,79 +97,59 @@ class UserService {
             let index = this.users.findIndex(e => e.id == id);
             if (index > -1) {
                 this.users[index] = new_data;
-                /*
-                this.bots[index].data.name = new_data.name;
-                this.bots[index].data.type = new_data.type;
-                this.bots[index].data.ability = new_data.ability;*/
                 this.modifyInFakeDB(id, new_data);
             }
         } catch(err) {
             throw err;
         }
         return `patched user ${id}`;
-    }
+    }*/
 
     /**
      * Modifies data in the data base
      * @param {*} index
      * @param {*} new_data
-     */
+     *//*
     async modifyInFakeDB(id, new_data) {
         let dbString = fs.readFileSync(this.fake_db_address, {encoding: "utf-8", flag: 'r'});
         let db_content = JSON.parse(dbString);
         let index =  db_content["users"].findIndex(e => e.id == id);
         db_content["users"][index] = new_data;
-        /*
-        db_content[index].data.name = new_data.name;
-        db_content[index].data.type = new_data.type;
-        db_content[index].data.ability = new_data.ability;*/
         fs.writeFileSync(this.fake_db_address, JSON.stringify(db_content), {encoding: "utf-8", flag: 'w'});
+    }*/
+
+    exists(data) {
+        try {
+            const ignored = this.getUser(data);
+            return true;
+        } catch(err) {
+            return false;
+        }
+
     }
 
     /**
      * Get a bot with a specific name
-     * @param {*} key
+     * @param {*} data
      * @returns
      */
     getUser(data){
-        let user = this.getFromFakeDB(data, true);
+        console.log(data)
+        let user = this.getFromFakeDB(data);
         if (user != null) {
-            this.users.push(user);
             return user.id;
         }
         throw new Error("cannot find this user");
     }
 
-    getFromFakeDB(data, connect=false) {
+    getFromFakeDB(data) {
         let dbString = fs.readFileSync(this.fake_db_address, {encoding: "utf-8", flag: 'r'});
         let db_content = JSON.parse(dbString);
-        let index;
-        if (connect)
-            index = db_content["users"].findIndex(e=> e.id == data.id && e.pwd == data.pwd);
-        else
-            index = db_content["users"].findIndex(e=> e.id == data.id);
+        let index = db_content["users"].findIndex(e=> e.id === data.id && e.pwd === data.pwd);
         if (index > -1) {
             return db_content["users"][index];
         }
         return null;
-    }
-
-    isConnected(userId) {
-        return this.users.findIndex(e => e.id == userId) !== -1;
-    }
-
-    /**
-     * Get all the bots
-     * @returns
-     */
-    getConnectedUsers(){
-        return this.users;
-    }
-
-    logOut(userid) {
-        let index = this.users.findIndex(e => e.id == userid);
-        if (index > -1)
-            this.users.splice(index, 1);
     }
 
     /**
@@ -265,13 +246,5 @@ function intLenPad(value, length) {
  * @param {*} string
  * @returns
  */
-function capitalize(string) {
-    try {
-        return string.charAt(0).toUpperCase() + string.slice(1);
-    } catch(err) {
-        throw err
-    }
-
-}
 
 module.exports = UserService;

@@ -3,6 +3,14 @@ body {
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
+.visible {
+  display: block;
+}
+
+.invisible {
+  display: none;
+}
+
 a {
   color: #00B7FF;
 }

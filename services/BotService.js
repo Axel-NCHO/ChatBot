@@ -1,6 +1,4 @@
 const fs = require("fs");
-const Bot = require("../classes/Bot");
-const JSONC = require("jsonc");
 const RiveScript = require("rivescript");
 
 /**
@@ -10,7 +8,6 @@ class BotService {
 
     constructor() {
         this.fake_db_address = "./models/db.json"    // not a real db. it's just the json file where i save the bots
-        this.bots = {};
     }
 
     static async create(){ //since I cannot return a promise in a constructor
@@ -24,26 +21,11 @@ class BotService {
      */
     async addBot(data) {
         data.name = capitalize(data.name);
-        if (this.exists({user: data.user, name: data.name})) {
+        if (await this.exists({id: data.id, name: data.name})) {
             throw new Error("You already created a bot with this name");
         }
-        let new_bot = new RiveScript({utf8: true});
-        new_bot.name = data.name;
-        new_bot.personality = data.personality;
-        new_bot.user = data.user;
-        new_bot.loadFile(`./rivescripts/${data.personality}.rive`)
-            .then(() => {
-                new_bot.sortReplies();
-                if(data.user in this.bots)
-                    this.bots[data.user]["bots"].push(new_bot);
-                else
-                    this.bots[data.user] = {bots: [new_bot], inUse: null}  ;
-            })
-            .then(() => {
-                console.log("Current bots: ", this.bots);
-                this.addToFakeDB(data);
-                return `created bot named ${data.name} with personality ${data.personality}`;
-        });
+        this.addToFakeDB({name: data.name, personality: data.personality, user: data.id});
+        return `created bot named ${data.name} with personality ${data.personality}`;
     }
 
     /**
@@ -53,21 +35,17 @@ class BotService {
      */
     async addToFakeDB(data) {
         let dbString = fs.readFileSync(this.fake_db_address, {encoding: "utf-8", flag: 'r'});
-        let db_content = JSONC.parse(dbString);
+        let db_content = JSON.parse(dbString);
         db_content["bots"].push(data);
-        fs.writeFileSync(this.fake_db_address, JSONC.stringify(db_content), {encoding: "utf-8", flag: 'w'});
+        fs.writeFileSync(this.fake_db_address, JSON.stringify(db_content), {encoding: "utf-8", flag: 'w'});
         return true;
-    }
-
-    addExistingBot(data) {
-        this.bots[data.user] = data;
     }
 
     /**
      * Deletes a pokemon
      * @param {*} name
      * @returns
-     */
+     *//*
     async removeBot(name){
         let botName = capitalize(name);
         let index = this.bots.findIndex(e => e.name == botName);
@@ -78,25 +56,25 @@ class BotService {
         }
         throw new Error(`cannot find bot named ${botName}`);
 
-    }
+    }*/
 
     /**
      * Delete data from the data base
      * @param {*} index
-     */
+     *//*
     async removeFromFakeDB(index) {
         let dbString = fs.readFileSync(this.fake_db_address, {encoding: "utf-8", flag: 'r'});
-        let db_content = JSONC.parse(dbString);
+        let db_content = JSON.parse(dbString);
         db_content["bots"].splice(index,1);
-        fs.writeFileSync(this.fake_db_address, JSONC.stringify(db_content), {encoding: "utf-8", flag: 'w'});
-    }
+        fs.writeFileSync(this.fake_db_address, JSON.stringify(db_content), {encoding: "utf-8", flag: 'w'});
+    }*/
 
     /**
      * Modify the informations of a pokemon
      * @param {*} key
      * @param {*} new_data must be like {name: str type: str, ability: str}
      * @returns
-     */
+     *//*
     async patchBot(name, new_data) {
         let botName = capitalize(name);
         if (undefined == new_data.name) {
@@ -106,36 +84,32 @@ class BotService {
             let index = this.bots.findIndex(e => e.name == botName);
             if (index > -1) {
                 this.bots[index] = new_data;
-                /*
-                this.bots[index].data.name = new_data.name;
-                this.bots[index].data.type = new_data.type;
-                this.bots[index].data.ability = new_data.ability;*/
                 this.modifyInFakeDB(index, new_data);
             }
         } catch(err) {
             throw err;
         }
         return `patched bot named ${botName}`;
-    }
+    }*/
 
     /**
      * Modifies data in the data base
-     * @param {*} index
-     * @param {*} new_data
+     * @param {*} data
      */
+
     async modifyInFakeDB(data) {
         let dbString = fs.readFileSync(this.fake_db_address, {encoding: "utf-8", flag: 'r'});
-        let db_content = JSONC.parse(dbString);
-        let index = db_content["bots"].findIndex(e => e.name == data.name && e.user == data.user);
+        let db_content = JSON.parse(dbString);
+        let index = db_content["bots"].findIndex(e => e.name === data.name && e.user === data.user);
         db_content["bots"][index] = data;
-        fs.writeFileSync(this.fake_db_address, JSONC.stringify(db_content), {encoding: "utf-8", flag: 'w'});
+        fs.writeFileSync(this.fake_db_address, JSON.stringify(db_content), {encoding: "utf-8", flag: 'w'});
     }
 
     /**
      * Get a bot with a specific name
      * @param {*} key
      * @returns
-     */
+     *//*
     getBotByName(data){
         data.name = capitalize(data.name);
         let bots = this.bots[data.user];
@@ -144,88 +118,76 @@ class BotService {
             return  (this.bots)[index];
         }
         throw new Error(`cannot find bot named ${botName}`);
+    }*/
+
+    async getBot(data, forUse=false) {
+        data.name = capitalize(data.name);
+        let bots = await this.getBots(data, forUse);
+        let index = bots.findIndex(e => e.name === data.name);
+        console.log("getbot")
+        console.log(bots[index])
+        return bots[index];
     }
 
     /**
      * Get all the bots
      * @returns
      */
-    async getBots(userId) {
-        this.bots[userId] = {bots: [], inUse: null};
-        await this.getFromFakeDB({user: userId});
-        return this.bots[userId]["bots"].map(e => {
-            return {name: e.name, personality: e.personality, user: e.user}
-        });
+    async getBots(data, forUse = false) {
+        console.log("getbots")
+        return await this.getFromFakeDB({user: data.id}, forUse);
     }
 
-    async getFromFakeDB(data) {
+    async getFromFakeDB(data, forUse = false) {
         let dbString = fs.readFileSync(this.fake_db_address, {encoding: "utf-8", flag: 'r'});
-        let db_content = JSONC.parse(dbString);
+        let db_content = JSON.parse(dbString);
         console.log("Got from db: ", db_content["bots"]);
+        let bots = [];
         if (db_content["bots"].length !== 0) {
             for (const bot of db_content["bots"]) {
                 if (bot.user === data.user) {
-                    let botObject = new RiveScript({utf8: true});
-                    botObject.name = bot.name;
-                    botObject.personality = bot.personality;
-                    botObject.user = bot.user;
-                    await botObject.loadFile(`./rivescripts/${bot.personality}.rive`).catch(err => console.log(err));
-                    botObject.sortReplies();
-                    if (bot.userVars)
-                        await botObject.setUservars(data.user, bot.userVars).catch(err => console.log(err));
-                    this.bots[data.user]["bots"].push(botObject);
-                    console.log("pushed");
-
+                    if (forUse) {
+                        let botObject = new RiveScript({utf8: true});
+                        botObject.name = bot.name;
+                        botObject.personality = bot.personality;
+                        botObject.user = bot.user;
+                        await botObject.loadFile(`./rivescripts/${bot.personality}.rive`).catch(err => console.log(err));
+                        botObject.sortReplies();
+                        if (bot.userVars)
+                            await botObject.setUservars(data.user, bot.userVars).catch(err => console.log(err));
+                        bots.push(botObject);
+                        console.log("pushed");
+                    } else
+                        bots.push({name: bot.name, personality: bot.personality, id: bot.user});
                 }
             }
         }
+        console.log("from db")
+        return bots;
     }
 
-    exists(data) {
-        console.log("Current bots: ", this.bots);
-        let index = this.bots[data.user]["bots"].findIndex(e=> e.name == data.name);
-        return index > -1;
+    async exists(data) {
+        console.log("exists")
+        return await this.getBot(data) !== undefined;
     }
 
-    async saveContext(userid){
-        console.log("userid: ", userid);
-        console.log("bots: ", this.bots[userid]);
-        if (this.bots[userid]["inUse"] != null) {
-            let index = this.bots[userid]["bots"].findIndex(e => e.name === this.bots[userid]["inUse"]);
-            if (index > -1) {
-                let data = {
-                    name: this.bots[userid]["inUse"],
-                    personality: this.bots[userid]["bots"][index].personality,
-                    user: userid,
-                    userVars: await this.bots[userid]["bots"][index].getUservars(userid)
-                };
-                this.modifyInFakeDB(data);
-                console.log(`Saved context for bot ${data.name} of user ${data.user}`);
-            } else
-                console.log("Error on index", index);
-
-        }
-    }
-
-    async logOut(userid) {
-        this.saveContext(userid)
-            .then(() => {
-                delete this.bots[userid];
-            })
-            .catch((err) => {console.log(err)});
-    }
-
-    async useBot(data) {
-        this.saveContext(data.user)
-            .then(() => {
-                this.bots[data.user]["inUse"] = data.name;
-            });
+    async saveContext(userid, bot){
+        let data = {
+            name: bot.name,
+            personality: bot.personality,
+            user: userid,
+            userVars: await bot.getUservars(userid)
+        };
+        this.modifyInFakeDB(data);
+        console.log(`Saved context for bot ${data.name} of user ${data.user}`);
     }
 
     async getResponse(data) {
-        let index = this.bots[data.user]["bots"].findIndex(e => e.name === this.bots[data.user]["inUse"]);
-        let bot = this.bots[data.user]["bots"][index];
-        return await bot.reply(data.user, data.input);
+        console.log("replying");
+        let bot = await this.getBot(data, true);
+        let response = await bot.reply(data.id, data.input_text);
+        await this.saveContext(data.id, bot);
+        return response;
     }
 
     /**

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <script src="/javascripts/utils.js"></script>
+    <script src="/javascripts/login-script.js"></script>
+    <script src="/javascripts/signup-script.js"></script>
+    <script src="/javascripts/bot-creation-script.js"></script>
+    <script src="/javascripts/bot-selection-script.js"></script>
+    <script src="/javascripts/chat-script.js"></script>
+  </head>
+  <body>
+
+    <p id="user-id-value" style="display: none"></p>
+    <p id="user-pwd-value" style="display: none"></p>
+
+    <div id="login-signup">
+      <div id="login">
+        <label>Log-in</label>
+        <label for="id-login">Login</label>
+        <input type="text" id="id-login" placeholder="Enter your ID">
+        <label for="pwd-login">Password</label>
+        <input type="text" id="pwd-login" placeholder="Enter your password">
+        <button id="submit-login">Submit</button>
+      </div>
+      <br>
+      <hr>
+      <br>
+      <div id="signup">
+        <label>Sign-up</label>
+        <label for="id-signup">Login</label>
+        <input type="text" id="id-signup" placeholder="Enter your ID">
+        <label for="pwd-signup">Password</label>
+        <input type="text" id="pwd-signup" placeholder="Enter your password">
+        <button id="submit-signup">Submit</button>
+      </div>
+    </div>
+
+    <div id="bots-list" class="invisible">
+      <label for="botname-selected">Enter the name of the bot you want to chat with</label>
+      <input type="text" id="botname-selected">
+      <button id="submit-bot-selection">Submit</button>
+    </div>
+
+    <div id="bots-creation" class="invisible">
+      <label>Create a new bot</label>
+      <label for="new-bot-name"></label>
+      <input type="text" id="new-bot-name">
+      <label for="new-bot-personality"></label>
+      <select id="new-bot-personality">
+        <option value="">--Choose a personality--</option>
+      </select>
+      <button  id="submit-bot-creation">Submit</button>
+    </div>
+
+    <div id="chat" class="invisible">
+      <p>You are chatting with <strong id="botname-current"></strong></p>
+      <div id="chat-history">
+
+      </div>
+      <div>
+        <textarea id="user-input-chat" placeholder="Write here"></textarea>
+      </div>
+    </div>
+
+  </body>
+</html>
