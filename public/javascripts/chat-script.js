@@ -1,39 +1,47 @@
 window.onload = function () {
 
     const chat_history = document.getElementById("chat-history");
-    const BOT_URL = "/chat/response";
-    const USER_ID = document.getElementById("userid").innerText;
-    alert(USER_ID);
-    const BOT_NAME = document.getElementById("botname");
+    const userid = document.getElementById("user-id-value");
+    const userpwd = document.getElementById("user-pwd-value");
+    const botname = document.getElementById("botname-current");
+    const user_input = document.getElementById("user-input-chat");
 
-    const user_input = document.getElementById("chat-user-input");
     user_input.addEventListener('keypress', async (e) => {
         if (e.key === 'Enter') {
+            let id = userid.innerText;
+            let pwd = userpwd.innerText;
+            let name = botname.innerText;
             let input_text = user_input.value;
-            alert(input_text);
             user_input.value = "";
 
-            const input = document.createElement('div');
-            input.innerHTML = `<p>${input_text}</p>`;
-            chat_history.appendChild(input);
+            if (input_text !== "") {
+                const input = document.createElement('div');
+                input.innerHTML = `<p>${input_text}</p>`;
+                chat_history.appendChild(input);
 
-            const rawResponse = await fetch(BOT_URL,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        user: USER_ID,
-                        botname: BOT_NAME,
-                        input: input_text})
+                const rawResponse = await fetchData(`/chatbot/api/v1/chat/response}`, 'POST', {
+                    id: id,
+                    pwd: pwd,
+                    name: name,
+                    input: input_text
                 });
-            const response = await rawResponse.json();
-
-            const box = document.createElement('div');
-            box.innerHTML = `<p>${response.text}</p><br>`;
-            chat_history.appendChild(box);
+                switch (rawResponse.status) {
+                    case 404:
+                        alert('RESOURCE NOT FOUND');
+                        break;
+                    case 500:
+                        await alert('SERVER ERROR');
+                        break;
+                    default:
+                        showReply(await rawResponse.json());
+                }
+            }
         }
-    })
+    });
+
+    function showReply(response) {
+        const box = document.createElement('div');
+        box.innerHTML = `<p>${response.text}</p><br>`;
+        chat_history.appendChild(box);
+    }
 }
