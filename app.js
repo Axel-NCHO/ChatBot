@@ -4,8 +4,10 @@ var logger = require('morgan');
 const { BotService, capitalize } = require("./services/BotService");
 const UserService = require("./services/UserService");
 
-var indexRouter = require('./routes/chatbot/api/v1/index');
+const botsRouter = require('./routes/chatbot/api/v1/bots');
 const chatRouter = require('./routes/chatbot/api/v1/chat');
+const usersRouter = require('./routes/chatbot/api/v1/users');
+const indexRouter = require('./routes/chatbot/api/v1/index');
 
 var app = express();
 
@@ -18,8 +20,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/chatbot/api/v1', indexRouter);
+app.use('/chatbot/api/v1/bots', botsRouter);
 app.use('/chatbot/api/v1/chat', chatRouter);
+app.use('/chatbot/api/v1/users', usersRouter);
+app.use('/chatbot/api/v1', indexRouter);
 
 app.set('capitalize', capitalize);
 

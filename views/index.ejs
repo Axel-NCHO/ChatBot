@@ -2,66 +2,78 @@
 <html lang="en">
   <head>
     <link rel='stylesheet' href='/stylesheets/style.css' />
-    <script src="/javascripts/utils.js"></script>
-    <script src="/javascripts/login-script.js"></script>
-    <script src="/javascripts/signup-script.js"></script>
-    <script src="/javascripts/bot-creation-script.js"></script>
-    <script src="/javascripts/bot-selection-script.js"></script>
-    <script src="/javascripts/chat-script.js"></script>
+
   </head>
   <body>
 
     <p id="user-id-value" style="display: none"></p>
     <p id="user-pwd-value" style="display: none"></p>
 
-    <div id="login-signup">
-      <div id="login">
-        <label>Log-in</label>
-        <label for="id-login">Login</label>
-        <input type="text" id="id-login" placeholder="Enter your ID">
-        <label for="pwd-login">Password</label>
-        <input type="text" id="pwd-login" placeholder="Enter your password">
+    <div id="login-signup" class="visible flex-box">
+      <div id="login" class="visible">
+        <label class="title">Log-in</label><br><br>
+        <label for="id-login" class="subtitle">Login</label><br>
+        <input type="text" id="id-login" placeholder="Enter your ID"><br><br>
+        <label for="pwd-login" class="subtitle">Password</label><br>
+        <input type="password" id="pwd-login" placeholder="Enter your password"><br><br>
         <button id="submit-login">Submit</button>
       </div>
-      <br>
-      <hr>
-      <br>
-      <div id="signup">
-        <label>Sign-up</label>
-        <label for="id-signup">Login</label>
-        <input type="text" id="id-signup" placeholder="Enter your ID">
-        <label for="pwd-signup">Password</label>
-        <input type="text" id="pwd-signup" placeholder="Enter your password">
+      <div id="signup" class="visible">
+        <label class="title">Sign-up</label><br><br>
+        <label for="id-signup" class="subtitle">Login</label><br>
+        <input type="text" id="id-signup" placeholder="Enter your ID"><br><br>
+        <label for="pwd-signup" class="subtitle">Password</label><br>
+        <input type="password" id="pwd-signup" placeholder="Enter your password"><br><br>
         <button id="submit-signup">Submit</button>
       </div>
-    </div>
+      <div id="bots-creation" class="invisible">
+          <label class="title">Create/Edit a bot</label><br><br>
+          <label for="new-bot-name">Name</label><br>
+          <input type="text" id="new-bot-name" placeholder="Enter a name"><br><br>
+          <label for="new-bot-personality">Personality</label><br>
+          <select id="new-bot-personality">
 
-    <div id="bots-list" class="invisible">
-      <label for="botname-selected">Enter the name of the bot you want to chat with</label>
-      <input type="text" id="botname-selected">
-      <button id="submit-bot-selection">Submit</button>
-    </div>
-
-    <div id="bots-creation" class="invisible">
-      <label>Create a new bot</label>
-      <label for="new-bot-name"></label>
-      <input type="text" id="new-bot-name">
-      <label for="new-bot-personality"></label>
-      <select id="new-bot-personality">
-        <option value="">--Choose a personality--</option>
-      </select>
-      <button  id="submit-bot-creation">Submit</button>
-    </div>
-
-    <div id="chat" class="invisible">
-      <p>You are chatting with <strong id="botname-current"></strong></p>
-      <div id="chat-history">
-
-      </div>
-      <div>
-        <textarea id="user-input-chat" placeholder="Write here"></textarea>
+          </select><br><br>
+          <div style="display: flex">
+            <button id="submit-bot-creation">Create</button>
+            <button id="submit_bot_modif">Edit</button>
+          </div>
       </div>
     </div>
+
+    <div style="display: flex">
+      <div id="bots-list-container" class="invisible">
+        <div class="container">
+          <label class="title">Your bots</label>
+          <div id="bots-list" class="flex-box">
+          </div>
+          <label for="botname-selected">I want to chat with</label>
+          <input type="text" id="botname-selected" placeholder="Name of the bot">
+          <button id="submit-bot-selection">Submit</button>
+        </div>
+      </div>
+
+      <div id="chat" class="invisible">
+        <div id="chat-container">
+          <div>
+            <p>You are chatting with <strong id="botname-current"></strong></p>
+            <div id="chat-history">
+
+            </div>
+            <div>
+              <textarea id="user-input-chat" placeholder="Write here"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--
+    <div>
+      <button id="logout" class="invisible">Logout</button>
+    </div>-->
+
 
   </body>
+  <script src="/javascripts/utils.js"></script>
+  <script src="/javascripts/login-script.js"></script>
 </html>

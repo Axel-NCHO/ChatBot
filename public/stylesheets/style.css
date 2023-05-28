@@ -1,6 +1,34 @@
 body {
   padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  font: 14px Helvetica, "Lucida Grande", Arial, sans-serif;
+  background-color: #212121;
+  color: white;
+}
+
+input {
+  border-radius: 10px;
+  height: 20px;
+  font-weight: bold;
+}
+
+select {
+  border-radius: 10px;
+  height: 25px;
+  font-weight: bold;
+}
+
+button {
+  border-radius: 10px;
+  height: 30px;
+  width: 100px;
+  background-color: #212121;
+  color: gray;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+label {
+  margin-bottom: 200px;
 }
 
 .visible {
@@ -11,6 +39,74 @@ body {
   display: none;
 }
 
+.flex-box {
+  display: flex;
+  background-color: #121212;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.box {
+  display: block;
+  background-color: #212121;
+  padding: 20px;
+  border-radius: 10px;
+  margin-right: 10px;
+}
+
+.container {
+  display: block;
+  background-color: #121212;
+  padding: 20px;
+  border-radius: 10px;
+  width: fit-content;
+}
+
+textarea {
+  font-weight: bold;
+  width: 480px;
+  height: 50px;
+}
+
+#chat-container {
+  display: block;
+  background-color: #121212;
+  padding: 20px;
+  border-radius: 10px;
+  width: fit-content;
+  margin-left: 10px;
+}
+
+#chat-history {
+  width: 500px;
+  height: 500px;
+  overflow-y: auto;
+}
+
 a {
   color: #00B7FF;
+}
+
+.title {
+  font-size: 18px;
+}
+
+#login, #signup  {
+  margin-right: 50px;
+}
+
+#login-signup, #bots-list-container {
+  width: fit-content;
+  max-width: 700px;
+  margin-bottom: 10px;
+  overflow-x: auto;
+}
+
+img {
+  width: 50px;
+  height: 50px;
+}
+
+#logout {
+  margin-top: 10px;
 }

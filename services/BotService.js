@@ -1,4 +1,5 @@
 const fs = require("fs");
+const path = require("path")
 const RiveScript = require("rivescript");
 
 /**
@@ -24,7 +25,7 @@ class BotService {
         if (await this.exists({id: data.id, name: data.name})) {
             throw new Error("You already created a bot with this name");
         }
-        this.addToFakeDB({name: data.name, personality: data.personality, user: data.id});
+        await this.addToFakeDB({name: data.name, personality: data.personality, user: data.id});
         return `created bot named ${data.name} with personality ${data.personality}`;
     }
 
@@ -45,52 +46,46 @@ class BotService {
      * Deletes a pokemon
      * @param {*} name
      * @returns
-     *//*
-    async removeBot(name){
-        let botName = capitalize(name);
-        let index = this.bots.findIndex(e => e.name == botName);
-        if(index >-1 ){
-            this.bots.splice(index,1);
-            this.removeFromFakeDB(index);
-            return `removed bot named ${botName}`;
-        }
-        throw new Error(`cannot find bot named ${botName}`);
-
-    }*/
+     */
+    async removeBot(data){
+        data.name = capitalize(data.name);
+        data.user = data.id;
+        await this.removeFromFakeDB(data);
+        return `removed bot ${data.name} of user ${data.id}`
+    }
 
     /**
      * Delete data from the data base
-     * @param {*} index
-     *//*
-    async removeFromFakeDB(index) {
+     * @param {*} data
+     */
+    async removeFromFakeDB(data) {
         let dbString = fs.readFileSync(this.fake_db_address, {encoding: "utf-8", flag: 'r'});
         let db_content = JSON.parse(dbString);
-        db_content["bots"].splice(index,1);
-        fs.writeFileSync(this.fake_db_address, JSON.stringify(db_content), {encoding: "utf-8", flag: 'w'});
-    }*/
+        let index = db_content["bots"].findIndex(e => e.name === data.name && e.user === data.user);
+        if (index > -1) {
+            db_content["bots"].splice(index,1);
+            fs.writeFileSync(this.fake_db_address, JSON.stringify(db_content), {encoding: "utf-8", flag: 'w'});
+        } else
+            throw new Error(`Couldn't find bot ${data.name} of user ${data.user}`);
+    }
 
     /**
      * Modify the informations of a pokemon
-     * @param {*} key
-     * @param {*} new_data must be like {name: str type: str, ability: str}
+     * @param {*} data
      * @returns
-     *//*
-    async patchBot(name, new_data) {
-        let botName = capitalize(name);
-        if (undefined == new_data.name) {
-            throw new Error(`Missing new data for bot named ${botName}`);
+     */
+    async patchBot(data) {
+        data.name = capitalize(data.name);
+        let old_bot = await this.getBot(data, true);
+        let new_bot = {
+            name: old_bot.name,
+            personality: data.personality,
+            user: old_bot.user,
+            userVars: await old_bot.getUservars()
         }
-        try {
-            let index = this.bots.findIndex(e => e.name == botName);
-            if (index > -1) {
-                this.bots[index] = new_data;
-                this.modifyInFakeDB(index, new_data);
-            }
-        } catch(err) {
-            throw err;
-        }
-        return `patched bot named ${botName}`;
-    }*/
+        await this.modifyInFakeDB(new_bot);
+        return `patched bot named ${data.name}`;
+    }
 
     /**
      * Modifies data in the data base
@@ -185,9 +180,23 @@ class BotService {
     async getResponse(data) {
         console.log("replying");
         let bot = await this.getBot(data, true);
-        let response = await bot.reply(data.id, data.input_text);
+        let response = await bot.reply(data.id, data.input);
         await this.saveContext(data.id, bot);
         return response;
+    }
+
+    getPersonalities() {
+        return this.listFilesWithoutExtensions("C:/Users/naxel/WebstormProjects/ChatBot/rivescripts");
+    }
+
+    listFilesWithoutExtensions(directoryPath) {
+        return fs.readdirSync(directoryPath)
+            .filter(file => {
+                const filePath = path.join(directoryPath, file);
+                const fileStats = fs.statSync(filePath);
+                return fileStats.isFile() && path.extname(file) !== '';
+            })
+            .map(file => path.parse(file).name);
     }
 
     /**

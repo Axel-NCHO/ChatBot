@@ -19,35 +19,24 @@ class UserService {
      * @param {*} data
      * @returns
      */
-    /*
+
     async addUser(data) {
-        let new_user;
-        if (this.getFromFakeDB(data) != null) {
-            throw new Error("User already exists");
-        }
-        new_user = new User(data);
-        this.users.push(new_user);
-        console.log("Current users: ", this.users);
-        this.addToFakeDB(new_user);
+        let new_user = new User(data);
+        await this.addToFakeDB(new_user);
         return `created user named ${data.id}`;
-    }*/
+    }
 
     /**
      * Insert data into the data base
      * @param {*} data
      * @returns
      */
-    /*
     async addToFakeDB(data) {
         let dbString = fs.readFileSync(this.fake_db_address, {encoding: "utf-8", flag: 'r'});
         let db_content = JSON.parse(dbString);
         db_content["users"].push(data);
         fs.writeFileSync(this.fake_db_address, JSON.stringify(db_content), {encoding: "utf-8", flag: 'w'});
         return true;
-    }*/
-
-    addExistingUser(data) {
-        this.users.push(data);
     }
 
     /**
@@ -135,11 +124,7 @@ class UserService {
      */
     getUser(data){
         console.log(data)
-        let user = this.getFromFakeDB(data);
-        if (user != null) {
-            return user.id;
-        }
-        throw new Error("cannot find this user");
+        return this.getFromFakeDB(data);
     }
 
     getFromFakeDB(data) {
@@ -147,7 +132,7 @@ class UserService {
         let db_content = JSON.parse(dbString);
         let index = db_content["users"].findIndex(e=> e.id === data.id && e.pwd === data.pwd);
         if (index > -1) {
-            return db_content["users"][index];
+            return db_content["users"][index]["id"];
         }
         return null;
     }
