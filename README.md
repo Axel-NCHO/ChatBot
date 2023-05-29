@@ -49,9 +49,10 @@ You can log out by :
 - refreshing the page (which will query the server for a new page)
 
 ### Routing
-On the server side, the routes are organized per category in different files. So 
+On the server side, the routes are organized per category in different files. For example, 
 the endpoint for the request 'PATCH /chatbot/api/v1/bots' can be found in the file 
 'routes/chatbot/api/v1/bots.js' and uses the url '/'.  
+![image](https://github.com/Axel-NCHO/ChatBot/assets/108560661/2553abd5-0c9f-4afc-aa2e-5402e366b826)
 
 The server is stateless, meaning that it doesn't store any user user session. However it checks if user 
 sending a request is registered.  
