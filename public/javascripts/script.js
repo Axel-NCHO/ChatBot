@@ -16,6 +16,7 @@ window.onload = function () {
 
     let chat = document.getElementById('chat');
     let submit_selection = document.getElementById("submit-bot-selection");
+    let submit_delete = document.getElementById("submit-bot-to-delete");
 
     const chat_history = document.getElementById("chat-history");
     const user_input = document.getElementById("user-input-chat");
@@ -34,12 +35,13 @@ window.onload = function () {
 
     submit_selection.addEventListener('click', handleSelection);
 
+    submit_delete.addEventListener('click', handleDelete);
+
     user_input.addEventListener('keypress', handleChat);
 
     logout.addEventListener('click', handleLogout);
 
     async function handleLogin() {
-        alert("yooo!")
         let id = useridlogin.value;
         let pwd = userpwdlogin.value;
         if (id !== "") {
@@ -58,7 +60,7 @@ window.onload = function () {
                     default:
                         let json = await rawResponse.json();
                         json.pwd = pwd;
-                        showHome(json);
+                        showHome(json, true);
                 }
             } else
                 alert("Missing password")
@@ -98,7 +100,6 @@ window.onload = function () {
     }
 
     async function handleCreationAndModif(e) {
-        alert("creation")
         if (e.button === 0) {   // left click
             let id = document.getElementById("user-id-value").innerText;
             let pwd = document.getElementById("user-pwd-value").innerText;
@@ -137,7 +138,6 @@ window.onload = function () {
     }
 
     async function handleSelection(e) {
-        alert("selected");
         if (e.button === 0) {   // left click
             let id = document.getElementById("user-id-value").innerText;
             let pwd = document.getElementById("user-pwd-value").innerText;
@@ -161,76 +161,112 @@ window.onload = function () {
 
     async function handleChat(e) {
         if (e.key === 'Enter') {
-            let id = document.getElementById("user-id-value").innerText;
-            let pwd = document.getElementById("user-pwd-value").innerText;
-            let name = document.getElementById("botname-current").innerText;
-            let input_text = user_input.value;
-            user_input.value = '';
+            if (e.shiftKey)
+                user_input.value = user_input.value + "\n";
+            else {
+                let id = document.getElementById("user-id-value").innerText;
+                let pwd = document.getElementById("user-pwd-value").innerText;
+                let name = document.getElementById("botname-current").innerText;
+                let input_text = user_input.value;
+                user_input.value = '';
 
-            if (input_text !== "") {
-                const input = document.createElement('div');
-                input.innerHTML = `<p class="box">In:<br>${input_text}</p>`;
-                chat_history.appendChild(input);
+                if (input_text !== "") {
+                    const input = document.createElement('div');
+                    input.innerHTML = `<p class="box">You:<br>${input_text}</p>`;
+                    chat_history.appendChild(input);
 
-                const rawResponse = await fetchData(`/chatbot/api/v1/chat/response`, 'POST', {
-                    id: id,
-                    pwd: pwd,
-                    name: name,
-                    input: input_text
-                });
-                switch (rawResponse.status) {
-                    case 404:
-                        alert('RESOURCE NOT FOUND');
-                        break;
-                    case 500:
-                        await alert('SERVER ERROR');
-                        break;
-                    default:
-                        showReply(await rawResponse.json());
+                    const rawResponse = await fetchData(`/chatbot/api/v1/chat/response`, 'POST', {
+                        id: id,
+                        pwd: pwd,
+                        name: name,
+                        input: input_text
+                    });
+                    switch (rawResponse.status) {
+                        case 404:
+                            alert('RESOURCE NOT FOUND');
+                            break;
+                        case 500:
+                            await alert('SERVER ERROR');
+                            break;
+                        default:
+                            showReply(await rawResponse.json());
+                    }
                 }
             }
         }
     }
 
+    async function handleDelete() {
+        let id = document.getElementById("user-id-value").innerText;
+        let pwd = document.getElementById("user-pwd-value").innerText;
+        let name = document.getElementById("botname-to-delete").value;
+        document.getElementById("botname-to-delete").value = "";
+
+        if (name !== "") {
+            let rawResponse = await fetchData("/chatbot/api/v1/bots", 'DELETE', {
+                id: id,
+                pwd: pwd,
+                name: name
+            });
+            switch(rawResponse.status) {
+                case 404:
+                    alert(`YOU DO NOT HAVE A BOT NAMED ${name}`);
+                    break;
+                default:
+                    let json = await rawResponse.json();
+                    refreshBots(json.bots);
+            }
+        } else
+            alert("Missing bot name");
+    }
+
     async function handleLogout() {
-        let rawResponse = await fetchData("/chatbot/api/v1/", 'GET');
-        switch (rawResponse.status) {
-            case 404:
-                alert('RESOURCE NOT FOUND');
-                break;
-            case 500:
-                await alert('SERVER ERROR');
-                break;
-            default:
-                document.write(await rawResponse.text());
-        }
+        document.getElementById("user-id-value").innerText = "";
+        document.getElementById("user-pwd-value").innerText = "";
+        document.getElementById("botname-selected").innerText = "";
+        document.getElementById("botname-current").innerText = "";
+        document.getElementById("chat-history").innerHTML = "";
+        document.getElementById("chat").className = "invisible";
+        document.getElementById("bots-list-container").className = "invisible";
+        document.getElementById("bots-creation").className = "invisible";
     }
 
     /**
      * Set page to home configuration
-     * @param {any} data
+     * @param {any} data object containing needed data
+     * @param {boolean} logged_in if true, show bot creation panel and refresh bots list
      */
-    function showHome(data) {
-        // document.getElementById("bots-creation").className = 'invisible';
+    function showHome(data, logged_in=false) {
         clearLogin();
         clearSignup()
         document.getElementById("chat").className = 'invisible';
         setCredentials(data.id, data.pwd);
-        enableBotCreation(data.personalities);
-        refreshBots(data.bots);
+        if (logged_in) {
+            enableBotCreation(data.personalities);
+            refreshBots(data.bots);
+        }
         enableLogOut();
     }
 
+    /**
+     * Clear login panel inputs
+     */
     function clearLogin() {
         useridlogin.value = "";
         userpwdlogin.value = "";
     }
 
+    /**
+     * Clear signup panel inputs
+     */
     function clearSignup() {
         useridsignup.value = "";
         userpwdsignup.value = "";
     }
 
+    /**
+     * Clear bot creation panel inputs
+     */
     function clearCreate() {
         document.getElementById("new-bot-name").value = "";
         document.getElementById("new-bot-personality").selectedIndex = 0;
@@ -264,7 +300,7 @@ window.onload = function () {
                 box.id = bot.name;
                 box.className = 'box';
                 box.innerHTML = `
-                    <img src="/images/bot.png" alt="bot image">
+                    <img class="normalimage" src="/images/bot.png" alt="bot image">
                     <p>${bot.name}</p>
                     <p>${bot.personality}</p>`;
                 botslist.appendChild(box);
@@ -289,7 +325,7 @@ window.onload = function () {
 
     function showReply(response) {
         const box = document.createElement('div');
-        box.innerHTML = `<p class="box">Out:<br>${response.text}</p><br>`;
+        box.innerHTML = `<p class="box"><img class="tinyimage" src="/images/bot.png" alt="bot image"><br>${response.text}</p><br>`;
         chat_history.appendChild(box);
         chat_history.scrollTop = chat_history.scrollHeight;
     }

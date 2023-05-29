@@ -81,6 +81,7 @@ textarea {
   width: 500px;
   height: 500px;
   overflow-y: auto;
+  /*overflow-x: ;*/
 }
 
 a {
@@ -102,9 +103,14 @@ a {
   overflow-x: auto;
 }
 
-img {
+.normalimage {
   width: 50px;
   height: 50px;
+}
+
+.tinyimage {
+  width: 20px;
+  height: 20px;
 }
 
 #logout {

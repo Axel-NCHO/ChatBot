@@ -1,6 +1,5 @@
-var express = require('express');
-var router = express.Router();
-
+const express = require('express');
+const router = express.Router();
 
 /* Authentication */
 router.post('/', async (req, res) => {
@@ -19,6 +18,7 @@ router.post('/', async (req, res) => {
         res.status(404).send('UNKNOWN ID');
 });
 
+/* Registration */
 router.post('/registration', async (req, res) => {
     console.log('creating account');
     let UserService = req.app.get("UserService");

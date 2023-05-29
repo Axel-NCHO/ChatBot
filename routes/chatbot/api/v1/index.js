@@ -1,8 +1,8 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 
-/* Auth page. */
-router.get('/', function(req, res, next) {
+/* GET GUI */
+router.get('/', function(req, res) {
     res.render('index');
 });
 

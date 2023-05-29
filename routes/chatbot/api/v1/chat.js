@@ -1,6 +1,7 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 
+/* Check if user 'id-pwd' ha bot 'name' */
 router.get('/id=:id&pwd=:pwd&name=:name', async (req,res) => {
     let UserService = req.app.get("UserService");
     let BotService = req.app.get("BotService");
@@ -14,7 +15,7 @@ router.get('/id=:id&pwd=:pwd&name=:name', async (req,res) => {
         res.status(404).send('UNKNOWN ID');
 });
 
-/* Reply (REST API) */
+/* Reply. Can be used directly */
 router.post('/response', async (req,res) => {
     let BotService = req.app.get('BotService');
     let UserService = req.app.get('UserService');

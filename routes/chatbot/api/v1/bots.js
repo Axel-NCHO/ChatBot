@@ -1,5 +1,5 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 
 /* Create a new bot */
 router.post('/', async (req, res) => {
@@ -21,6 +21,7 @@ router.post('/', async (req, res) => {
       res.status(404).send('UNKNOWN ID');
 });
 
+/* Modify a bot */
 router.patch('/', async (req, res) => {
     let botService = req.app.get('BotService');
     let userService = req.app.get('UserService');
@@ -34,6 +35,7 @@ router.patch('/', async (req, res) => {
         res.status(404).send('UNKNOWN ID');
 });
 
+/* Delete a bot */
 router.delete('/', async (req, res) => {
     let botService = req.app.get('BotService');
     let userService = req.app.get('UserService');

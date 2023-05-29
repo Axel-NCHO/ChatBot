@@ -3,15 +3,15 @@ const path = require("path")
 const RiveScript = require("rivescript");
 
 /**
- * Helper class to perform bots related operations
+ * Helper class to perform bot related operations
  */
 class BotService {
 
     constructor() {
-        this.fake_db_address = "./models/db.json"    // not a real db. it's just the json file where i save the bots
+        this.fake_db_address = "./models/db.json"    // not a real db. it's just the json file where I save the bots
     }
 
-    static async create(){ //since I cannot return a promise in a constructor
+    static async create() { //since I cannot return a promise in a constructor
         return new BotService();
     }
 
@@ -30,7 +30,7 @@ class BotService {
     }
 
     /**
-     * Insert data into the data base
+     * Insert a bot into the database
      * @param {*} data
      * @returns
      */
@@ -43,11 +43,11 @@ class BotService {
     }
 
     /**
-     * Deletes a pokemon
-     * @param {*} name
+     * Delete a bot
+     * @param {*} data
      * @returns
      */
-    async removeBot(data){
+    async removeBot(data) {
         data.name = capitalize(data.name);
         data.user = data.id;
         await this.removeFromFakeDB(data);
@@ -55,7 +55,7 @@ class BotService {
     }
 
     /**
-     * Delete data from the data base
+     * Remove a bot from the database
      * @param {*} data
      */
     async removeFromFakeDB(data) {
@@ -63,14 +63,14 @@ class BotService {
         let db_content = JSON.parse(dbString);
         let index = db_content["bots"].findIndex(e => e.name === data.name && e.user === data.user);
         if (index > -1) {
-            db_content["bots"].splice(index,1);
+            db_content["bots"].splice(index, 1);
             fs.writeFileSync(this.fake_db_address, JSON.stringify(db_content), {encoding: "utf-8", flag: 'w'});
         } else
             throw new Error(`Couldn't find bot ${data.name} of user ${data.user}`);
     }
 
     /**
-     * Modify the informations of a pokemon
+     * Modify the information of a bot
      * @param {*} data
      * @returns
      */
@@ -88,7 +88,7 @@ class BotService {
     }
 
     /**
-     * Modifies data in the data base
+     * Modify a bot in the database
      * @param {*} data
      */
 
@@ -101,25 +101,16 @@ class BotService {
     }
 
     /**
-     * Get a bot with a specific name
-     * @param {*} key
-     * @returns
-     *//*
-    getBotByName(data){
-        data.name = capitalize(data.name);
-        let bots = this.bots[data.user];
-        let index = bots.findIndex(e=> e.name == data.name);
-        if(index >-1 ){
-            return  (this.bots)[index];
-        }
-        throw new Error(`cannot find bot named ${botName}`);
-    }*/
-
-    async getBot(data, forUse=false) {
+     * Get a bot
+     * @param data containing user credentials and bot name
+     * @param forUse true if you plan to use the bot
+     * @returns {Promise<*>}
+     */
+    async getBot(data, forUse = false) {
         data.name = capitalize(data.name);
         let bots = await this.getBots(data, forUse);
         let index = bots.findIndex(e => e.name === data.name);
-        console.log("getbot")
+        console.log("get bot")
         console.log(bots[index])
         return bots[index];
     }
@@ -129,10 +120,16 @@ class BotService {
      * @returns
      */
     async getBots(data, forUse = false) {
-        console.log("getbots")
+        console.log("get bots")
         return await this.getFromFakeDB({user: data.id}, forUse);
     }
 
+    /**
+     * Get all the bots from the database
+     * @param data
+     * @param forUse true if you plan to use at least one of the bots
+     * @returns {Promise<[]>}
+     */
     async getFromFakeDB(data, forUse = false) {
         let dbString = fs.readFileSync(this.fake_db_address, {encoding: "utf-8", flag: 'r'});
         let db_content = JSON.parse(dbString);
@@ -161,12 +158,23 @@ class BotService {
         return bots;
     }
 
+    /**
+     * Check if a bot exists
+     * @param data
+     * @returns {Promise<boolean>}
+     */
     async exists(data) {
         console.log("exists")
         return await this.getBot(data) !== undefined;
     }
 
-    async saveContext(userid, bot){
+    /**
+     * Save the context of a bot
+     * @param userid user id
+     * @param bot bot name
+     * @returns {Promise<void>}
+     */
+    async saveContext(userid, bot) {
         let data = {
             name: bot.name,
             personality: bot.personality,
@@ -177,6 +185,11 @@ class BotService {
         console.log(`Saved context for bot ${data.name} of user ${data.user}`);
     }
 
+    /**
+     * Reply to user input
+     * @param data containing user credentials, bot name and user input
+     * @returns {Promise<*>}
+     */
     async getResponse(data) {
         console.log("replying");
         let bot = await this.getBot(data, true);
@@ -185,10 +198,19 @@ class BotService {
         return response;
     }
 
+    /**
+     * Get all personalities available
+     * @returns {string[]}
+     */
     getPersonalities() {
-        return this.listFilesWithoutExtensions("C:/Users/naxel/WebstormProjects/ChatBot/rivescripts");
+        return this.listFilesWithoutExtensions("./rivescripts");
     }
 
+    /**
+     * Get the list of all files in a directory without the extensions
+     * @param directoryPath
+     * @returns {string[]}
+     */
     listFilesWithoutExtensions(directoryPath) {
         return fs.readdirSync(directoryPath)
             .filter(file => {
@@ -198,98 +220,10 @@ class BotService {
             })
             .map(file => path.parse(file).name);
     }
-
-    /**
-     * Get a type
-     * @param {*} name
-     * @returns
-     */
-    /*
-    getType(name){
-        let index = this.types.findIndex(e=> e.name == name);
-        if(index >-1 ){
-            return  (this.types)[index];
-        }
-        throw new Error(`cannot find pokemon of id ${id}`);
-    }*/
-
-    /**
-     * Get all the types
-     * @returns
-     */
-    /*
-    getTypes(){
-        return this.types;
-    }*/
-
-    /**
-     * A a new ability to the data base
-     * @param {*} data
-     * @returns
-     */
-    /*
-    async addAbility(data) {
-        if (undefined == data.name) {
-            throw new Error("Missing name for ability")
-        }
-        if (undefined == data.description) {
-            throw new Error("Missing description for ability")
-        }
-        if (undefined == data.genfamily) {
-            throw new Error("Missing genfamily for ability")
-        }
-        this.abilities.push({name: data.name, description: data.description, genfamily: data.genfamily});
-        return (`added type ${data.name}`);
-    }*/
-
-    /**
-     * Get an ability
-     * @param {*} name
-     * @returns
-     */
-    /*
-    getAbility(name){
-        let index = this.abilities.findIndex(e=> e.name == name);
-        if(index >-1 ){
-            return  (this.abilities)[index];
-        }
-        throw new Error(`cannot find pokemon of id ${id}`);
-    }*/
-
-    /**
-     * Get all the abilities
-     * @returns
-     */
-    /*
-    getAbilities(){
-        return this.abilities;
-    }*/
-
-    /**
-     * Converts a number to a valid pokemon key
-     * @param {*} key an integer
-     * @returns a pokemon key
-     */
-    /*
-    toPokemonKey(key) {
-        return intLenPad(key, this.MIN_KEY_LENGTH);
-    }*/
 }
 
 /**
- * Formats an integer so that it has a specific number of digits.
- * If it has less than 3 digits, it is filled with zeros
- * @param {*} value an integer
- * @param {*} length the number of digits
- * @returns
- */
-/*
-function intLenPad(value, length) {
-    return ( new Array(length+1).join('0') + value).slice(-length);
-}*/
-
-/**
- * Puts the first caracter of a string to upper case
+ * Puts the first character of a string to an upper case
  * @param {*} string
  * @returns
  */
