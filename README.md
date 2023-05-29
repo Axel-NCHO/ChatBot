@@ -17,7 +17,7 @@ Open your browser and go to
 ### Logging-in 
 You will end up on a log-in and sign-up page.  
 There are already two accounts created:
-- One with bots (id: jean, pwd: 1234) 
+- One with one bot named Steeve (id: jean, pwd: 1234)
 - one with no bots (id: user2,
 pwd: 1234).  
 
