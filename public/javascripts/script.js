@@ -46,7 +46,7 @@ window.onload = function () {
         let pwd = userpwdlogin.value;
         if (id !== "") {
             if (pwd !== "") {
-                let rawResponse = await fetchData('/chatbot/api/v1/users', 'POST', {
+                let rawResponse = await fetchData('/chatbot/api/v1/users/auth', 'POST', {
                     id: id,
                     pwd: pwd
                 });
@@ -73,7 +73,7 @@ window.onload = function () {
         let pwd = userpwdsignup.value;
         if (id !== "") {
             if (pwd !== "") {
-                const rawResponse = await fetchData('/chatbot/api/v1/users/registration', 'POST', {
+                const rawResponse = await fetchData('/chatbot/api/v1/users/', 'POST', {
                     id: id,
                     pwd: pwd
                 });

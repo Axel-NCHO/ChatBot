@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 /* Authentication */
-router.post('/', async (req, res) => {
+router.post('/auth', async (req, res) => {
     console.log('connecting')
     let UserService = req.app.get("UserService");
     let BotService = req.app.get("BotService");
@@ -19,7 +19,7 @@ router.post('/', async (req, res) => {
 });
 
 /* Registration */
-router.post('/registration', async (req, res) => {
+router.post('/', async (req, res) => {
     console.log('creating account');
     let UserService = req.app.get("UserService");
     let BotService = req.app.get("BotService");
